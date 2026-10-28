@@ -1,0 +1,54 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+__pycache__/
+*.py[cod]
+backend/traceability.sqlite3
+backend/traceability.sqlite3-*
+backend/uploads/*.enc
+backend/uploads/.processing-*
+backend/uploads/.retry-*
+
+# Directory for instrumented code leveraged by Istanbul
+lib-cov
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower components
+bower_components
+
+# node-modules
+node_modules/
+
+# Production build outputs
+dist/
+build/
+
+# IDE files
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

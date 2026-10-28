@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="880" viewBox="0 0 1400 880" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="hdr1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1e3a8a"/><stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="hdr2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0f766e"/><stop offset="1" stop-color="#14b8a6"/>
+    </linearGradient>
+    <linearGradient id="hdr3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c2d12"/><stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+    <linearGradient id="hdr4" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#312e81"/><stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="880" fill="url(#bg)"/>
+  <text x="700" y="48" text-anchor="middle" font-size="30" font-weight="800" fill="#0f172a">System Architecture — AI-Powered Old Age Pension Eligibility Screening &amp; Tracking</text>
+  <text x="700" y="76" text-anchor="middle" font-size="15" fill="#475569">React SPA (Vite) · Context State · AI Screening Engine · Officer Review Workflow</text>
+
+  <!-- Layer 1: Presentation -->
+  <g>
+    <rect x="60" y="105" width="1280" height="180" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <rect x="60" y="105" width="1280" height="38" rx="16" fill="url(#hdr1)"/>
+    <text x="80" y="130" font-size="16" font-weight="700" fill="#ffffff">1 · PRESENTATION LAYER (React SPA)</text>
+
+    <g font-size="13" font-weight="600" fill="#1e293b" text-anchor="middle">
+      <rect x="90"  y="160" width="270" height="100" rx="10" fill="#eff6ff" stroke="#3b82f6"/>
+      <text x="225" y="188" font-size="14" font-weight="800" fill="#1e3a8a">Applicant Portal</text>
+      <text x="225" y="210">Home · About · TN Schemes</text>
+      <text x="225" y="230">CSC Locator · Notifications</text>
+
+      <rect x="390" y="160" width="270" height="100" rx="10" fill="#eff6ff" stroke="#3b82f6"/>
+      <text x="525" y="188" font-size="14" font-weight="800" fill="#1e3a8a">Eligibility Wizard</text>
+      <text x="525" y="210">Multi-step Application Form</text>
+      <text x="525" y="230">Voice Assistant · Eligibility Quiz</text>
+
+      <rect x="690" y="160" width="270" height="100" rx="10" fill="#eff6ff" stroke="#3b82f6"/>
+      <text x="825" y="188" font-size="14" font-weight="800" fill="#1e3a8a">Status Tracker</text>
+      <text x="825" y="210">Application Timeline</text>
+      <text x="825" y="230">Real-time Status Updates</text>
+
+      <rect x="990" y="160" width="320" height="100" rx="10" fill="#eef2ff" stroke="#6366f1"/>
+      <text x="1150" y="188" font-size="14" font-weight="800" fill="#312e81">Officer Portal (Top Navigation)</text>
+      <text x="1150" y="210">Dashboard · Review Queue</text>
+      <text x="1150" y="230">Scheme Rules · Audit Reports</text>
+    </g>
+  </g>
+
+  <!-- Layer 2: State -->
+  <g>
+    <rect x="60" y="325" width="610" height="110" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <rect x="60" y="325" width="610" height="38" rx="16" fill="url(#hdr2)"/>
+    <text x="80" y="350" font-size="16" font-weight="700" fill="#ffffff">2 · STATE MANAGEMENT (React Context API)</text>
+    <g font-size="12.5" fill="#0f766e" font-weight="600">
+      <text x="90" y="390">Global Store: applications · activeTab · user session</text>
+      <text x="90" y="413">Notifications · selected application for audit detail</text>
+    </g>
+  </g>
+
+  <!-- Layer 3: AI Engine -->
+  <g>
+    <rect x="730" y="325" width="610" height="110" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <rect x="730" y="325" width="610" height="38" rx="16" fill="url(#hdr3)"/>
+    <text x="750" y="350" font-size="16" font-weight="700" fill="#ffffff">3 · AI ELIGIBILITY SCREENING ENGINE</text>
+    <g font-size="12.5" fill="#9a3412" font-weight="600">
+      <text x="760" y="390">Rule-based Scoring (age / income / residence) · AI Score 0–100</text>
+      <text x="760" y="413">Risk Flagging (score &lt; 75 → manual audit) · Conflict Detection</text>
+    </g>
+  </g>
+
+  <!-- Layer 4: Domain / workflow -->
+  <g>
+    <rect x="60" y="475" width="1280" height="160" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <rect x="60" y="475" width="1280" height="38" rx="16" fill="url(#hdr4)"/>
+    <text x="80" y="500" font-size="16" font-weight="700" fill="#ffffff">4 · APPLICATION WORKFLOW &amp; BUSINESS RULES</text>
+
+    <g text-anchor="middle" font-size="12.5" font-weight="700">
+      <rect x="100" y="535" width="250" height="72" rx="10" fill="#f1f5f9" stroke="#94a3b8"/>
+      <text x="225" y="565" fill="#0f172a">1. Submission</text>
+      <text x="225" y="586" fill="#64748b" font-weight="500">Applicant form + documents</text>
+
+      <rect x="390" y="535" width="250" height="72" rx="10" fill="#fef3c7" stroke="#f59e0b"/>
+      <text x="515" y="565" fill="#92400e">2. AI Pre-Verification</text>
+      <text x="515" y="586" fill="#a16207" font-weight="500">Auto eligibility scoring</text>
+
+      <rect x="680" y="535" width="250" height="72" rx="10" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="805" y="565" fill="#1e3a8a">3. Officer Review</text>
+      <text x="805" y="586" fill="#475569" font-weight="500">Queue audit · Approve / Reject</text>
+
+      <rect x="970" y="535" width="250" height="72" rx="10" fill="#dcfce7" stroke="#22c55e"/>
+      <text x="1095" y="565" fill="#166534">4. Decision &amp; Tracking</text>
+      <text x="1095" y="586" fill="#15803d" font-weight="500">Sanction · Status notifications</text>
+
+      <line x1="350" y1="571" x2="388" y2="571" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+      <line x1="640" y1="571" x2="678" y2="571" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+      <line x1="930" y1="571" x2="968" y2="571" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+    </g>
+  </g>
+
+  <!-- Layer 5: Data + Integration -->
+  <g>
+    <rect x="60" y="675" width="610" height="160" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <rect x="60" y="675" width="610" height="38" rx="16" fill="url(#hdr2)"/>
+    <text x="80" y="700" font-size="16" font-weight="700" fill="#ffffff">5 · DATA LAYER</text>
+    <g font-size="13" fill="#334155" font-weight="600">
+      <rect x="90" y="725" width="250" height="80" rx="10" fill="#f0fdfa" stroke="#14b8a6"/>
+      <text x="215" y="758" text-anchor="middle" fill="#0f766e" font-weight="800">Application Database</text>
+      <text x="215" y="780" text-anchor="middle">Applicant records · statuses</text>
+
+      <rect x="370" y="725" width="250" height="80" rx="10" fill="#f0fdfa" stroke="#14b8a6"/>
+      <text x="495" y="758" text-anchor="middle" fill="#0f766e" font-weight="800">Documents Store</text>
+      <text x="495" y="780" text-anchor="middle">Proofs · certificates · audit trail</text>
+    </g>
+  </g>
+
+  <g>
+    <rect x="730" y="675" width="610" height="160" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <rect x="730" y="675" width="610" height="38" rx="16" fill="url(#hdr1)"/>
+    <text x="750" y="700" font-size="16" font-weight="700" fill="#ffffff">6 · EXTERNAL INTEGRATIONS</text>
+    <g font-size="13" fill="#334155" font-weight="600">
+      <rect x="760" y="725" width="170" height="80" rx="10" fill="#eff6ff" stroke="#3b82f6"/>
+      <text x="845" y="758" text-anchor="middle" fill="#1e3a8a" font-weight="800">DigiLocker</text>
+      <text x="845" y="780" text-anchor="middle">Document verify</text>
+
+      <rect x="950" y="725" width="170" height="80" rx="10" fill="#eff6ff" stroke="#3b82f6"/>
+      <text x="1035" y="758" text-anchor="middle" fill="#1e3a8a" font-weight="800">CSC Network</text>
+      <text x="1035" y="780" text-anchor="middle">Assisted filing</text>
+
+      <rect x="1140" y="725" width="170" height="80" rx="10" fill="#eff6ff" stroke="#3b82f6"/>
+      <text x="1225" y="758" text-anchor="middle" fill="#1e3a8a" font-weight="800">SMS / Alerts</text>
+      <text x="1225" y="780" text-anchor="middle">Status notifications</text>
+    </g>
+  </g>
+
+  <!-- Connector arrows between layers -->
+  <g stroke="#475569" stroke-width="3">
+    <line x1="365" y1="290" x2="365" y2="322" marker-end="url(#arrow)"/>
+    <line x1="1035" y1="290" x2="1035" y2="322" marker-end="url(#arrow)"/>
+    <line x1="1035" y1="438" x2="1035" y2="472" marker-end="url(#arrow)"/>
+    <line x1="365" y1="438" x2="365" y2="472" marker-end="url(#arrow)"/>
+    <line x1="1035" y1="638" x2="1035" y2="672" marker-end="url(#arrow)"/>
+    <line x1="365" y1="638" x2="365" y2="672" marker-end="url(#arrow)"/>
+    <line x1="672" y1="380" x2="728" y2="380" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+  </g>
+  <text x="700" y="372" text-anchor="middle" font-size="11.5" fill="#64748b" font-weight="600">submits application</text>
+</svg>
