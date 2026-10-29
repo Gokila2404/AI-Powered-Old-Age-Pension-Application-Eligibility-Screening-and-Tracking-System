@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import {
@@ -39,6 +39,23 @@ export const Navbar = () => {
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const langRef = useRef(null);
+
+  // Close language dropdown when clicking outside
+  useEffect(() => {
+    if (!langDropdownOpen) return;
+    const handler = (e) => {
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setLangDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [langDropdownOpen]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -278,7 +295,7 @@ export const Navbar = () => {
           )}
 
           {/* Language toggle — icon-only on mobile to save space */}
-          <div className="relative">
+          <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
               className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] font-bold border border-white/20 transition"
@@ -294,7 +311,7 @@ export const Navbar = () => {
 
             {langDropdownOpen && (
               <ul
-                className="absolute right-0 mt-2 w-36 bg-white border border-slate-200 rounded-xl shadow-2xl py-1 z-50 text-xs overflow-hidden"
+                className="absolute right-0 mt-2 w-36 bg-white border border-slate-200 rounded-xl shadow-2xl py-1 z-[60] text-xs overflow-hidden"
                 role="listbox"
               >
                 {[
@@ -303,7 +320,7 @@ export const Navbar = () => {
                 ].map(opt => (
                   <li key={opt.code}>
                     <button
-                      onClick={() => { setLanguage(opt.code); setLangDropdownOpen(false); }}
+                      onClick={() => { setLanguage(opt.code); setLangDropdownOpen(false); setMobileMenuOpen(false); }}
                       className={`w-full flex items-center justify-between px-3 py-2 text-left transition ${
                         language === opt.code
                           ? 'bg-blue-50 text-blue-700'

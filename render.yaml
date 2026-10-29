@@ -58,26 +58,31 @@ services:
         value: "true"
       - key: ALLOW_CONSOLE_OTP_FALLBACK
         value: "false"  # Must be false in production — forces real email delivery
-      # ---- Resend API (leave blank unless you have a verified domain at resend.com/domains) ----
-      # Without domain verification Resend only delivers to its own account email (403 for others).
-      # Gmail SMTP below is the primary delivery channel.
+      # ---- Brevo Transactional Email API — PRIMARY channel on Render Free ----
+      # Render Free blocks ALL SMTP ports (25/465/587) → "Network is unreachable"
+      # Brevo uses HTTPS (port 443) — safe on Render Free, 300 emails/day free.
+      # Setup: brevo.com → Account → SMTP & API → API Keys → Create key
+      #        Then: Senders & IPs → Add a Sender → verify suga240406@gmail.com
+      # Add BREVO_API_KEY in Render Dashboard → Environment → Add env var
+      - key: BREVO_API_KEY
+        sync: false     # REQUIRED: set in Render Dashboard — get free key at brevo.com
+      # ---- Resend API (leave blank — requires verified custom domain) ----
       - key: RESEND_API_KEY
         value: ""
-      # ---- Gmail SMTP — primary OTP delivery on Render ----
-      # Render Free allows outbound port 587 (STARTTLS). Port 465 (SSL) may be blocked.
+      # ---- SMTP (works locally; ALL ports blocked on Render Free tier) ----
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
-        value: "587"    # STARTTLS — works on Render Free tier
+        value: "587"
       - key: SMTP_USE_SSL
-        value: "false"  # false = STARTTLS on port 587
+        value: "false"
       - key: SMTP_USE_TLS
-        value: "true"   # true = enable STARTTLS
+        value: "true"
       - key: SMTP_USER
-        sync: false     # set in Render Dashboard: suga240406@gmail.com
+        sync: false     # suga240406@gmail.com
       - key: SMTP_PASSWORD
-        sync: false     # set in Render Dashboard: Gmail App Password (16 chars, no spaces)
+        sync: false     # Gmail App Password (16 chars, no spaces)
       - key: SMTP_FROM_EMAIL
-        sync: false     # set in Render Dashboard: suga240406@gmail.com
+        sync: false     # suga240406@gmail.com
       - key: GEMINI_API_KEY
         sync: false

@@ -29,6 +29,9 @@ from backend.config import (
     SMTP_USE_TLS,
     SMTP_USER,
 )
+
+# Brevo sender name shown in the inbox
+BREVO_SENDER_NAME = "Pension Seva"
 from backend.database import db_manager
 
 logger = logging.getLogger("pension_seva.otp")
@@ -181,156 +184,139 @@ def mask_destination(target: str) -> str:
 
 
 def _send_email(target: str, code: str) -> bool:
-    """Send an OTP to *target*.
+    """Deliver an OTP to *target*.
 
-    Returns:
-        True  – the code was delivered via a real email channel (Resend / SMTP).
-        False – delivery fell back to the console log only; the caller should
-                include the code in the API response so the user can still
-                complete verification.
+    Delivery chain (all HTTP/HTTPS — safe on Render Free tier):
+      1. Brevo API  — free 300 emails/day; verify sender email only, no domain needed.
+      2. Resend API — requires a verified custom domain; skipped if domain not set.
+      3. Gmail SMTP — works locally; ALL SMTP ports (587/465) are blocked on Render Free.
+      4. Console fallback — only when ALLOW_CONSOLE_OTP_FALLBACK=true (dev only).
+
+    Returns True on real email delivery, False on console fallback.
     """
-    # 1. Direct Console / Mock OTP Provider
-    if OTP_PROVIDER in {"console", "mock", "demo"}:
-        logger.warning("🔑 [CONSOLE OTP] Verification code for %s is: %s", target, code)
-        return False  # not a real email delivery
+    subject = "Your Pension Seva verification code"
+    html = (
+        f'<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;'
+        f'border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc">'
+        f'<h2 style="color:#1d4ed8;margin:0 0 4px">Pension Seva</h2>'
+        f'<p style="color:#64748b;font-size:13px;margin:0 0 16px">Secure Verification Code</p>'
+        f'<p style="color:#1e293b;font-size:15px;margin:0 0 8px">Your one-time verification code is:</p>'
+        f'<div style="font-size:40px;font-weight:900;letter-spacing:12px;color:#1d4ed8;'
+        f'text-align:center;padding:20px;background:#eff6ff;border-radius:8px;margin:8px 0 16px">'
+        f'{code}</div>'
+        f'<p style="color:#475569;font-size:13px;margin:0 0 16px">'
+        f'Valid for <strong>{OTP_EXPIRY_SECONDS // 60} minutes</strong>. Never share this code.</p>'
+        f'<p style="color:#94a3b8;font-size:11px;margin:0">'
+        f'Pension Seva — Welfare Platform. If you did not request this, ignore this email.</p></div>'
+    )
+    text = (
+        f"Your Pension Seva verification code is: {code}\n"
+        f"Valid for {OTP_EXPIRY_SECONDS // 60} minutes. Never share this code.\n"
+        f"If you did not request this, ignore this email."
+    )
 
-    # 2. Resend API (HTTP port 443 — works on Render Free Tier)
+    # ── 0. Console / demo mode ───────────────────────────────────────────────
+    if OTP_PROVIDER in {"console", "mock", "demo"}:
+        logger.warning("🔑 [CONSOLE OTP] %s → %s", target, code)
+        return False
+
+    # ── 1. Brevo Transactional Email API  (HTTP port 443 ✓ Render-safe) ─────
+    # Setup: brevo.com → Account → SMTP & API → API Keys
+    # Verify your sender email in Brevo: Senders & IPs → Add a Sender → confirm email.
+    # Free tier: 300 emails/day. No custom domain required.
+    if BREVO_API_KEY:
+        try:
+            sender_email = SMTP_FROM_EMAIL or "noreply@pensionseva.in"
+            resp = requests.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={"api-key": BREVO_API_KEY, "Content-Type": "application/json"},
+                json={
+                    "sender": {"name": "Pension Seva", "email": sender_email},
+                    "to": [{"email": target}],
+                    "subject": subject,
+                    "htmlContent": html,
+                    "textContent": text,
+                },
+                timeout=10,
+            )
+            if resp.status_code in {200, 201, 202}:
+                logger.info("OTP sent to %s via Brevo ✓", mask_destination(target))
+                return True
+            logger.error("Brevo API failed: %s %s", resp.status_code, resp.text)
+        except Exception as exc:
+            logger.error("Brevo API exception: %s", exc)
+
+    # ── 2. Resend API  (HTTP port 443 ✓ Render-safe) ────────────────────────
+    # Requires a verified domain at resend.com/domains.
+    # Without domain verification → 403 for any email other than the account owner's.
     if RESEND_API_KEY:
         try:
             sender = RESEND_FROM_EMAIL or "onboarding@resend.dev"
             resp = requests.post(
                 "https://api.resend.com/emails",
-                headers={
-                    "Authorization": f"Bearer {RESEND_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "from": sender,
-                    "to": [target],
-                    "subject": "Your Pension Seva verification code",
-                    "html": (
-                        f"<p>Your <strong>Pension Seva</strong> verification code is:</p>"
-                        f"<h2 style='letter-spacing:4px'>{code}</h2>"
-                        f"<p>It expires in {OTP_EXPIRY_SECONDS // 60} minutes. Do not share it with anyone.</p>"
-                    ),
-                    "text": (
-                        f"Your Pension Seva verification code is {code}. "
-                        f"It expires in {OTP_EXPIRY_SECONDS // 60} minutes."
-                    ),
-                },
+                headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+                json={"from": sender, "to": [target], "subject": subject, "html": html, "text": text},
                 timeout=10,
             )
             if resp.status_code in {200, 201}:
-                logger.info("OTP sent successfully to %s via Resend API", mask_destination(target))
-                return True  # real delivery
+                logger.info("OTP sent to %s via Resend ✓", mask_destination(target))
+                return True
             logger.error("Resend API failed: %s %s", resp.status_code, resp.text)
-            # 403 = test-mode restriction (unverified domain); fall through to SMTP
         except Exception as exc:
             logger.error("Resend API exception: %s", exc)
 
-    # 3. Standard SMTP (Gmail, etc.)
+    # ── 3. Gmail / SMTP  (works locally; ALL ports blocked on Render Free) ──
     if all((SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM_EMAIL)):
-        subject = "Your Pension Seva verification code"
-        body_text = (
-            f"Your Pension Seva verification code is: {code}\n"
-            f"It expires in {OTP_EXPIRY_SECONDS // 60} minutes.\n"
-            f"Do not share this code with anyone."
-        )
-        body_html = f"""
-<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;
-            border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc">
-  <h2 style="color:#1d4ed8;margin-bottom:4px">Pension Seva</h2>
-  <p style="color:#64748b;font-size:13px;margin-top:0">Verification Code</p>
-  <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0">
-  <p style="color:#1e293b;font-size:15px">Your one-time verification code is:</p>
-  <div style="font-size:36px;font-weight:900;letter-spacing:10px;color:#1d4ed8;
-              text-align:center;padding:16px;background:#eff6ff;border-radius:8px;
-              margin:16px 0">{code}</div>
-  <p style="color:#475569;font-size:13px">
-    This code expires in <strong>{OTP_EXPIRY_SECONDS // 60} minutes</strong>.
-    Do not share it with anyone.
-  </p>
-  <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0">
-  <p style="color:#94a3b8;font-size:11px">
-    Pension Seva — Welfare Application Platform. If you did not request this code, ignore this email.
-  </p>
-</div>"""
-
-        # Build the message with both plain-text and HTML parts
         from email.mime.multipart import MIMEMultipart
         from email.mime.text import MIMEText
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = SMTP_FROM_EMAIL
-        msg["To"] = target
-        msg.attach(MIMEText(body_text, "plain"))
-        msg.attach(MIMEText(body_html, "html"))
-
-        password = SMTP_PASSWORD.strip()
+        msg["From"]    = SMTP_FROM_EMAIL
+        msg["To"]      = target
+        msg.attach(MIMEText(text, "plain"))
+        msg.attach(MIMEText(html, "html"))
+        password   = SMTP_PASSWORD.strip()
         last_error: Exception | None = None
-
-        # Try port 587 STARTTLS first (works on Render Free + most cloud hosts),
-        # then fall back to port 465 SSL.
-        attempts = [
-            (SMTP_HOST, 587, False),   # STARTTLS — preferred on cloud
-            (SMTP_HOST, 465, True),    # SSL fallback
-        ]
-
-        for host, port, use_ssl in attempts:
+        for host, port, use_ssl in [(SMTP_HOST, 587, False), (SMTP_HOST, 465, True)]:
             try:
                 if use_ssl:
-                    with smtplib.SMTP_SSL(host, port, timeout=12) as smtp:
-                        smtp.ehlo()
-                        smtp.login(SMTP_USER, password)
-                        smtp.sendmail(SMTP_FROM_EMAIL, [target], msg.as_string())
+                    with smtplib.SMTP_SSL(host, port, timeout=12) as s:
+                        s.ehlo(); s.login(SMTP_USER, password)
+                        s.sendmail(SMTP_FROM_EMAIL, [target], msg.as_string())
                 else:
-                    with smtplib.SMTP(host, port, timeout=12) as smtp:
-                        smtp.ehlo()
-                        smtp.starttls()
-                        smtp.ehlo()
-                        smtp.login(SMTP_USER, password)
-                        smtp.sendmail(SMTP_FROM_EMAIL, [target], msg.as_string())
-                logger.info("OTP sent successfully to %s via SMTP %s:%s", mask_destination(target), host, port)
-                return True  # real delivery ✓
+                    with smtplib.SMTP(host, port, timeout=12) as s:
+                        s.ehlo(); s.starttls(); s.ehlo()
+                        s.login(SMTP_USER, password)
+                        s.sendmail(SMTP_FROM_EMAIL, [target], msg.as_string())
+                logger.info("OTP sent to %s via SMTP %s:%s ✓", mask_destination(target), host, port)
+                return True
             except (OSError, smtplib.SMTPException) as exc:
-                logger.error(
-                    "SMTP send failed via %s:%s (ssl=%s): %s: %s",
-                    host, port, use_ssl, type(exc).__name__, exc,
-                )
+                logger.error("SMTP %s:%s failed: %s: %s", host, port, type(exc).__name__, exc)
                 last_error = exc
 
-        # Both SMTP attempts failed
-        if ALLOW_CONSOLE_OTP_FALLBACK:
-            logger.warning(
-                "⚠️ All SMTP ports (587/465) failed. Console fallback active. "
-                "🔑 [FALLBACK OTP] Code for %s: %s",
-                target, code,
-            )
-            return False  # console fallback — not a real email delivery
+    # ── 4. Console fallback  (dev / staging only) ────────────────────────────
+    if ALLOW_CONSOLE_OTP_FALLBACK:
+        logger.warning(
+            "⚠️  All email channels failed. Console fallback. 🔑 Code for %s: %s",
+            target, code,
+        )
+        return False
 
-        logger.error("SMTP delivery to %s failed after all attempts.", mask_destination(target))
-        raise HTTPException(
-            status_code=502,
-            detail=(
-                "Could not send the verification email. "
-                "Please check that your Gmail App Password is correct and that "
-                "2-Step Verification is enabled on your Google account."
-            ),
-        ) from last_error
-
-    # No provider configured at all
-    if ALLOW_CONSOLE_OTP_FALLBACK or OTP_PROVIDER in {"console", "mock", "demo"}:
-        logger.warning("🔑 [CONSOLE OTP] Verification code for %s is: %s", target, code)
-        return False  # console fallback
-
-    raise HTTPException(status_code=503, detail="Email OTP delivery is not configured on the server.")
+    raise HTTPException(
+        status_code=502,
+        detail=(
+            "Could not deliver the verification email. "
+            "Set BREVO_API_KEY on the server for reliable email delivery on Render Free tier. "
+            "Sign up free at brevo.com, verify your sender email, and add the API key."
+        ),
+    )
 
 
 def _check_provider_and_target(target: str):
     normalized_target = target.strip().lower()
     if "@" not in normalized_target:
         raise HTTPException(status_code=503, detail="SMS OTP delivery is not supported. Use an email address for verification.")
-    if OTP_PROVIDER in {"console", "mock", "demo"} or ALLOW_CONSOLE_OTP_FALLBACK or RESEND_API_KEY:
+    if OTP_PROVIDER in {"console", "mock", "demo"} or ALLOW_CONSOLE_OTP_FALLBACK or BREVO_API_KEY or RESEND_API_KEY:
         return normalized_target
     if OTP_PROVIDER not in {"email", "smtp"} or not all((SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM_EMAIL)):
         raise HTTPException(status_code=503, detail="Email OTP delivery is not configured on the server.")
@@ -338,7 +324,7 @@ def _check_provider_and_target(target: str):
 
 
 def ensure_email_delivery_available():
-    if OTP_PROVIDER in {"console", "mock", "demo"} or ALLOW_CONSOLE_OTP_FALLBACK or RESEND_API_KEY:
+    if OTP_PROVIDER in {"console", "mock", "demo"} or ALLOW_CONSOLE_OTP_FALLBACK or BREVO_API_KEY or RESEND_API_KEY:
         return
     if OTP_PROVIDER not in {"email", "smtp"} or not all((SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM_EMAIL)):
         raise HTTPException(status_code=503, detail="Email OTP delivery is not configured on the server.")

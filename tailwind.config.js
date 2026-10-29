@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Inter"', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        // Noto Sans Tamil added after Inter so Tamil script glyphs render correctly on Android
+        sans: ['"Inter"', '"Noto Sans Tamil"', '"Segoe UI"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', '"Cascadia Code"', 'Consolas', 'monospace'],
       },
       colors: {

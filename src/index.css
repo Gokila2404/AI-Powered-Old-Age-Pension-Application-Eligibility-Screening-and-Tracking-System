@@ -4,7 +4,8 @@
 
 @layer base {
   body {
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    /* Inter for Latin; Noto Sans Tamil as fallback for Tamil script glyphs */
+    font-family: 'Inter', 'Noto Sans Tamil', 'Segoe UI', system-ui, -apple-system, sans-serif;
     color: #1e293b;
     background:
       radial-gradient(1000px 400px at 85% -80px, rgba(30, 58, 138, 0.10), transparent),
@@ -15,7 +16,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Inter', 'Noto Sans Tamil', 'Segoe UI', system-ui, sans-serif;
     font-weight: 800;
     letter-spacing: -0.02em;
     color: #0f172a;
