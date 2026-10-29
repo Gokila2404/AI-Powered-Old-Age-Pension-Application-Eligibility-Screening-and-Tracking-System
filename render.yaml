@@ -46,6 +46,12 @@ services:
         value: /usr/bin/tesseract # Tesseract is preinstalled on Render's Python image
       - key: OTP_PROVIDER
         value: email
+      - key: LOGIN_OTP_REQUIRED
+        value: "true" # Set to "false" to log in directly without OTP
+      - key: ALLOW_CONSOLE_OTP_FALLBACK
+        value: "true" # Prints OTP in Render Logs if SMTP ports are blocked by Render
+      - key: RESEND_API_KEY
+        sync: false # Optional: HTTP email delivery that works over port 443 without SMTP blocks
       - key: OTP_EXPIRY_SECONDS
         value: "120"
       - key: SMTP_HOST

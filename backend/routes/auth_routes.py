@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Request, status, Depends
 from backend.models import UserRegister, UserLogin, TokenResponse, UserProfile, PasswordResetRequest, UserSettings
 from backend.database import db_manager
 from backend.auth import get_password_hash, verify_password, create_access_token, get_current_user, decode_access_token
+from backend.config import LOGIN_OTP_REQUIRED
 from backend.services.otp_service import (
     consume_verified_otp,
     ensure_email_delivery_available,
@@ -161,26 +162,24 @@ async def login(payload: UserLogin):
             "createdAt": created_at,
         })
 
+    if not LOGIN_OTP_REQUIRED:
+        token = create_access_token({"sub": user_id, "role": role, "name": full_name})
+        settings_dict = user.get("settings", {})
+        settings_obj = UserSettings(**settings_dict) if settings_dict else UserSettings()
+        profile = UserProfile(
+            id=user_id,
+            fullName=full_name,
+            email=email,
+            mobile=mobile,
+            role=role,
+            preferredLanguage=user.get("preferredLanguage", "en"),
+            settings=settings_obj,
+            createdAt=created_at
+        )
+        return TokenResponse(access_token=token, user=profile)
+
     otp_result = issue_otp(email, "login", user_id)
     return {"otp_required": True, **otp_result}
-
-    token = create_access_token({"sub": user_id, "role": role, "name": full_name})
-
-    settings_dict = user.get("settings", {})
-    settings_obj = UserSettings(**settings_dict) if settings_dict else UserSettings()
-
-    profile = UserProfile(
-        id=user_id,
-        fullName=full_name,
-        email=email,
-        mobile=mobile,
-        role=role,
-        preferredLanguage=user.get("preferredLanguage", "en"),
-        settings=settings_obj,
-        createdAt=created_at
-    )
-
-    return TokenResponse(access_token=token, user=profile)
 
 @router.post("/admin-login")
 async def admin_login(payload: UserLogin):
@@ -217,23 +216,22 @@ async def admin_login(payload: UserLogin):
             "createdAt": user.get("createdAt") or datetime.datetime.utcnow().isoformat(),
         })
 
+    if not LOGIN_OTP_REQUIRED:
+        token = create_access_token({"sub": user_id, "role": "ADMIN", "name": full_name})
+        profile = UserProfile(
+            id=user_id,
+            fullName=full_name,
+            email=user["email"],
+            mobile=mobile,
+            role="ADMIN",
+            preferredLanguage=user.get("preferredLanguage", "en"),
+            settings=UserSettings(**user.get("settings", {})),
+            createdAt=user.get("createdAt", datetime.datetime.utcnow().isoformat())
+        )
+        return TokenResponse(access_token=token, user=profile)
+
     otp_result = issue_otp(user["email"], "login", user_id)
     return {"otp_required": True, **otp_result}
-
-    token = create_access_token({"sub": user_id, "role": "ADMIN", "name": full_name})
-
-    profile = UserProfile(
-        id=user_id,
-        fullName=full_name,
-        email=user["email"],
-        mobile=mobile,
-        role="ADMIN",
-        preferredLanguage=user.get("preferredLanguage", "en"),
-        settings=UserSettings(**user.get("settings", {})),
-        createdAt=user.get("createdAt", datetime.datetime.utcnow().isoformat())
-    )
-
-    return TokenResponse(access_token=token, user=profile)
 
 @router.get("/me", response_model=UserProfile)
 async def get_me(current_user: dict = Depends(get_current_user)):
