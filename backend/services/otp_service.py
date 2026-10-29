@@ -5,6 +5,7 @@ import logging
 import secrets
 import smtplib
 import uuid
+import requests
 from email.message import EmailMessage
 
 from fastapi import HTTPException
@@ -19,6 +20,7 @@ from backend.config import (
     OTP_PROVIDER,
     OTP_RESEND_COOLDOWN_SECONDS,
     RESEND_API_KEY,
+    RESEND_FROM_EMAIL,
     SMTP_FROM_EMAIL,
     SMTP_HOST,
     SMTP_PASSWORD,
@@ -188,7 +190,7 @@ def _send_email(target: str, code: str):
     if RESEND_API_KEY:
         try:
             import requests
-            sender = SMTP_FROM_EMAIL or "onboarding@resend.dev"
+            sender = RESEND_FROM_EMAIL or "onboarding@resend.dev"
             resp = requests.post(
                 "https://api.resend.com/emails",
                 headers={

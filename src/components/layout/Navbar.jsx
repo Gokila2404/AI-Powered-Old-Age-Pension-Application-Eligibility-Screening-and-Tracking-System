@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import {
@@ -50,28 +50,29 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-40 gradient-hero text-white shadow-lg shadow-indigo-900/20 font-sans">
 
-      <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
+      <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2">
 
         {/* Brand Logo & Tagline */}
         <Link
           to={userRole === 'ADMIN' ? '/admin/dashboard' : (currentUser ? '/' : '/')}
-          className="flex items-center gap-3 group shrink-0"
+          className="flex items-center gap-2 group shrink-0 min-w-0"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-md border border-blue-400/30">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-md border border-blue-400/30 shrink-0">
             PS
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg sm:text-xl tracking-tight text-white group-hover:text-blue-300 transition">
+              <span className="font-extrabold text-base sm:text-xl tracking-tight text-white group-hover:text-blue-300 transition truncate">
                 Pension Seva
               </span>
               {userRole === 'ADMIN' && (
-                <span className="text-[10px] uppercase font-black tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full shadow-sm">
+                <span className="text-[10px] uppercase font-black tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full shadow-sm shrink-0">
                   Admin
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-300 font-medium">
+            {/* Hide tagline on very small screens to save space */}
+            <p className="hidden sm:block text-[11px] text-slate-300 font-medium">
               Check. Apply. Track. Get Support.
             </p>
           </div>
@@ -140,7 +141,7 @@ export const Navbar = () => {
                 className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
               >
                 <Home className="w-3.5 h-3.5 text-blue-300" />
-                <span>{language === 'ta' ? 'à®®à¯à®•à®ªà¯à®ªà¯' : 'Home'}</span>
+                <span>{language === 'ta' ? 'முகப்பு' : 'Home'}</span>
               </NavLink>
 
               <NavLink
@@ -148,7 +149,7 @@ export const Navbar = () => {
                 className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
               >
                 <Workflow className="w-3.5 h-3.5 text-blue-300" />
-                <span>{language === 'ta' ? 'à®šà¯†à®¯à®²à¯à®®à¯à®±à¯ˆ' : 'How It Works'}</span>
+                <span>{language === 'ta' ? 'செயல்முறை' : 'How It Works'}</span>
               </NavLink>
 
               <NavLink
@@ -156,7 +157,7 @@ export const Navbar = () => {
                 className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
               >
                 <FileText className="w-3.5 h-3.5 text-blue-300" />
-                <span>{language === 'ta' ? 'à®¤à®¿à®Ÿà¯à®Ÿà®™à¯à®•à®³à¯' : 'Schemes'}</span>
+                <span>{language === 'ta' ? 'திட்டங்கள்' : 'Schemes'}</span>
               </NavLink>
 
               <NavLink
@@ -164,7 +165,7 @@ export const Navbar = () => {
                 className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>{language === 'ta' ? 'à®¤à®•à¯à®¤à®¿ à®šà®°à®¿à®ªà®¾à®°à¯' : 'Check Eligibility'}</span>
+                <span>{language === 'ta' ? 'தகுதி சரிபார்' : 'Check Eligibility'}</span>
               </NavLink>
 
               <NavLink
@@ -172,7 +173,7 @@ export const Navbar = () => {
                 className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
               >
                 <Search className="w-3.5 h-3.5 text-cyan-300" />
-                <span>{language === 'ta' ? 'à®•à®£à¯à®•à®¾à®£à®¿à®ªà¯à®ªà¯' : 'Track'}</span>
+                <span>{language === 'ta' ? 'கண்காணிப்பு' : 'Track'}</span>
               </NavLink>
 
               <NavLink
@@ -180,7 +181,7 @@ export const Navbar = () => {
                 className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-rose-600 text-white font-bold' : 'text-rose-300 hover:bg-white/10'}`}
               >
                 <MessageSquareHeart className="w-3.5 h-3.5" />
-                <span>{language === 'ta' ? 'à®‰à®¤à®µà®¿ à®ªà®¾à®Ÿà¯' : 'Welfare Assist'}</span>
+                <span>{language === 'ta' ? 'உதவி பாடு' : 'Welfare Assist'}</span>
               </NavLink>
 
               <NavLink
@@ -188,7 +189,7 @@ export const Navbar = () => {
                 className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
               >
                 <HelpCircle className="w-3.5 h-3.5 text-blue-300" />
-                <span>{language === 'ta' ? 'à®‰à®¤à®µà®¿' : 'Help'}</span>
+                <span>{language === 'ta' ? 'உதவி' : 'Help'}</span>
               </NavLink>
 
               {currentUser && (
@@ -197,7 +198,7 @@ export const Navbar = () => {
                   className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
                 >
                   <FileText className="w-3.5 h-3.5 text-emerald-300" />
-                  <span>{language === 'ta' ? 'à®Žà®©à®¤à¯ à®µà®¿à®£à¯à®£à®ªà¯à®ªà®™à¯à®•à®³à¯' : 'My Applications'}</span>
+                  <span>{language === 'ta' ? 'எனது விண்ணப்பங்கள்' : 'My Applications'}</span>
                 </NavLink>
               )}
 
@@ -207,23 +208,25 @@ export const Navbar = () => {
                   className={({ isActive }) => `px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${isActive ? 'bg-white/20 text-white font-bold shadow-sm' : 'text-blue-100 hover:bg-white/10'}`}
                 >
                   <User className="w-3.5 h-3.5 text-blue-300" />
-                  <span>{language === 'ta' ? 'à®Žà®©à®¤à¯ à®¤à®³à®®à¯' : 'My Dashboard'}</span>
+                  <span>{language === 'ta' ? 'எனது தளம்' : 'My Dashboard'}</span>
                 </NavLink>
               )}
             </>
           )}
         </nav>
 
-        {/* Right CTA / Auth controls */}
-        <div className="flex items-center gap-2">
+        {/* Right side controls */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
+          {/* Logged-in user controls */}
           {currentUser ? (
             <div className="flex items-center gap-1.5">
-              {/* Notification bell icon */}
+              {/* Notification bell */}
               <Link
                 to="/notifications"
                 className="relative p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
-                aria-label={language === 'ta' ? 'à®…à®±à®¿à®µà®¿à®ªà¯à®ªà¯à®•à®³à¯' : 'Notifications'}
-                title={language === 'ta' ? 'à®…à®±à®¿à®µà®¿à®ªà¯à®ªà¯à®•à®³à¯' : 'Notifications'}
+                aria-label={language === 'ta' ? 'அறிவிப்புகள்' : 'Notifications'}
+                title={language === 'ta' ? 'அறிவிப்புகள்' : 'Notifications'}
               >
                 <Bell className="w-5 h-5 text-amber-300" />
                 {unreadCount > 0 && (
@@ -236,66 +239,76 @@ export const Navbar = () => {
               {/* Profile avatar */}
               <Link
                 to={userRole === 'ADMIN' ? '/admin/dashboard' : '/profile'}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-xl border border-white/20 transition"
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-2 sm:px-3 py-1.5 rounded-xl border border-white/20 transition"
                 title={currentUser.fullName}
               >
-                <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center font-bold text-[11px]">
+                <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center font-bold text-[11px] shrink-0">
                   {currentUser.fullName ? currentUser.fullName[0].toUpperCase() : 'U'}
                 </div>
                 <span className="hidden md:inline max-w-[120px] truncate">{currentUser.fullName}</span>
               </Link>
 
-              {/* Sign out icon */}
+              {/* Sign out */}
               <button
                 onClick={handleLogout}
                 className="p-2 rounded-xl bg-white/10 hover:bg-rose-500/30 text-rose-200 transition"
-                aria-label={language === 'ta' ? 'à®µà¯†à®³à®¿à®¯à¯‡à®±à¯' : 'Sign Out'}
-                title={language === 'ta' ? 'à®µà¯†à®³à®¿à®¯à¯‡à®±à¯' : 'Sign Out'}
+                aria-label={language === 'ta' ? 'வெளியேறு' : 'Sign Out'}
+                title={language === 'ta' ? 'வெளியேறு' : 'Sign Out'}
               >
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            /* Login / Register — hidden on mobile (accessible via hamburger drawer) */
+            <div className="hidden sm:flex items-center gap-2">
               <Link
                 to="/login"
                 className="px-3 py-1.5 rounded-xl text-xs font-bold text-blue-100 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5"
               >
                 <LogIn className="w-3.5 h-3.5 text-blue-400" />
-                <span>{language === 'ta' ? 'à®‰à®³à¯à®¨à¯à®´à¯ˆ' : 'Login'}</span>
+                <span>{language === 'ta' ? 'உள்நுழை' : 'Login'}</span>
               </Link>
               <Link
                 to="/register"
                 className="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-900 hover:bg-blue-800 text-white shadow-md transition"
               >
-                <span>{language === 'ta' ? 'à®ªà®¤à®¿à®µà¯à®šà¯†à®¯à¯' : 'Register'}</span>
+                <span>{language === 'ta' ? 'பதிவுசெய்' : 'Register'}</span>
               </Link>
             </div>
           )}
 
-          {/* Language Dropdown */}
+          {/* Language toggle — icon-only on mobile to save space */}
           <div className="relative">
             <button
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] font-bold border border-white/20 transition"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] font-bold border border-white/20 transition"
               aria-haspopup="listbox"
               aria-expanded={langDropdownOpen}
-              aria-label={language === 'ta' ? 'à®®à¯Šà®´à®¿à®¤à¯ à®¤à¯‡à®°à¯à®µà¯' : 'Language selection'}
+              aria-label={language === 'ta' ? 'மொழித் தேர்வு' : 'Language selection'}
             >
               <Languages className="w-4 h-4 text-blue-300" />
-              <span>{language === 'ta' ? 'à®¤à®®à®¿à®´à¯' : 'English'}</span>
+              {/* Show label only on sm+ screens */}
+              <span className="hidden sm:inline">{language === 'ta' ? 'தமிழ்' : 'EN'}</span>
               <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${langDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
+
             {langDropdownOpen && (
               <ul
                 className="absolute right-0 mt-2 w-36 bg-white border border-slate-200 rounded-xl shadow-2xl py-1 z-50 text-xs overflow-hidden"
                 role="listbox"
               >
-                {[{ code: 'en', label: 'English', sub: 'English' }, { code: 'ta', label: 'à®¤à®®à®¿à®´à¯', sub: 'Tamil' }].map(opt => (
+                {[
+                  { code: 'en', label: 'English', sub: 'English' },
+                  { code: 'ta', label: 'தமிழ்', sub: 'Tamil' },
+                ].map(opt => (
                   <li key={opt.code}>
                     <button
                       onClick={() => { setLanguage(opt.code); setLangDropdownOpen(false); }}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-left transition ${language === opt.code ? 'bg-blue-600/20 text-blue-300' : 'text-slate-200 hover:bg-white/10'}`}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-left transition ${
+                        language === opt.code
+                          ? 'bg-blue-50 text-blue-700'
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
                       role="option"
                       aria-selected={language === opt.code}
                     >
@@ -303,7 +316,7 @@ export const Navbar = () => {
                         <span className="block font-bold">{opt.label}</span>
                         <span className="block text-[10px] text-slate-400">{opt.sub}</span>
                       </span>
-                      {language === opt.code && <Check className="w-3.5 h-3.5" />}
+                      {language === opt.code && <Check className="w-3.5 h-3.5 text-blue-600" />}
                     </button>
                   </li>
                 ))}
@@ -311,7 +324,7 @@ export const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Hamburger */}
+          {/* Hamburger — visible on mobile/tablet */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300"
@@ -325,6 +338,28 @@ export const Navbar = () => {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <nav aria-label="Main navigation" className="lg:hidden max-h-[75vh] overflow-y-auto bg-gradient-to-b from-indigo-700 to-blue-800 border-t border-white/15 px-4 py-4 space-y-1 text-sm font-semibold">
+
+          {/* Show Login/Register at the top of the drawer when logged out */}
+          {!currentUser && (
+            <div className="flex gap-2 pb-3 border-b border-white/15 mb-2">
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200"
+              >
+                <LogIn className="w-4 h-4 text-blue-400" />
+                <span>{language === 'ta' ? 'உள்நுழை' : 'Login'}</span>
+              </Link>
+              <Link
+                to="/register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold"
+              >
+                <span>{language === 'ta' ? 'பதிவுசெய்' : 'Register'}</span>
+              </Link>
+            </div>
+          )}
+
           <Link
             to="/"
             onClick={() => setMobileMenuOpen(false)}
@@ -387,24 +422,28 @@ export const Navbar = () => {
             className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-white/10 text-slate-200"
           >
             <HelpCircle className="w-4 h-4 text-blue-400" />
-            <span>Help & FAQ</span>
+            <span>Help &amp; FAQ</span>
           </Link>
+
+          {/* Language selector in drawer */}
           <div className="pt-2 border-t border-slate-700">
             <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              {language === 'ta' ? 'à®®à¯Šà®´à®¿ / Language' : 'Language / à®®à¯Šà®´à®¿'}
+              {language === 'ta' ? 'மொழி / Language' : 'Language / மொழி'}
             </p>
             <div className="px-3">
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 className="w-full py-2 px-3 text-xs font-bold rounded-lg border bg-white/10 border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/40"
-                aria-label={language === 'ta' ? 'à®®à¯Šà®´à®¿à®¤à¯ à®¤à¯‡à®°à¯à®µà¯' : 'Language selection'}
+                aria-label={language === 'ta' ? 'மொழித் தேர்வு' : 'Language selection'}
               >
                 <option value="en">English</option>
-                <option value="ta">à®¤à®®à®¿à®´à¯ (Tamil)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
               </select>
             </div>
           </div>
+
+          {/* Logged-in account links */}
           {currentUser && (
             <div className="mt-3 border-t border-slate-700 pt-3">
               <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Your account</p>
@@ -440,7 +479,3 @@ export const Navbar = () => {
     </header>
   );
 };
-
-
-
-
