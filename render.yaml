@@ -46,27 +46,38 @@ services:
         value: /usr/bin/tesseract # Tesseract is preinstalled on Render's Python image
       - key: OTP_PROVIDER
         value: email
-      - key: LOGIN_OTP_REQUIRED
-        value: "true" # Set to "false" to log in directly without OTP
-      - key: ALLOW_CONSOLE_OTP_FALLBACK
-        value: "true" # Prints OTP in Render Logs if SMTP ports are blocked by Render
-      - key: RESEND_API_KEY
-        sync: false # Optional: HTTP email delivery that works over port 443 without SMTP blocks
       - key: OTP_EXPIRY_SECONDS
-        value: "120"
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_PORT
-        value: "465"
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASSWORD
-        sync: false
-      - key: SMTP_USE_TLS
-        value: "false"
-      - key: SMTP_USE_SSL
+        value: "300"   # 5 minutes
+      - key: OTP_MAX_ATTEMPTS
+        value: "5"
+      - key: OTP_RESEND_COOLDOWN_SECONDS
+        value: "60"
+      - key: OTP_MAX_REQUESTS_PER_HOUR
+        value: "5"
+      - key: LOGIN_OTP_REQUIRED
         value: "true"
+      - key: ALLOW_CONSOLE_OTP_FALLBACK
+        value: "false"  # Must be false in production — forces real email delivery
+      # ---- Resend API (leave blank unless you have a verified domain at resend.com/domains) ----
+      # Without domain verification Resend only delivers to its own account email (403 for others).
+      # Gmail SMTP below is the primary delivery channel.
+      - key: RESEND_API_KEY
+        value: ""
+      # ---- Gmail SMTP — primary OTP delivery on Render ----
+      # Render Free allows outbound port 587 (STARTTLS). Port 465 (SSL) may be blocked.
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"    # STARTTLS — works on Render Free tier
+      - key: SMTP_USE_SSL
+        value: "false"  # false = STARTTLS on port 587
+      - key: SMTP_USE_TLS
+        value: "true"   # true = enable STARTTLS
+      - key: SMTP_USER
+        sync: false     # set in Render Dashboard: suga240406@gmail.com
+      - key: SMTP_PASSWORD
+        sync: false     # set in Render Dashboard: Gmail App Password (16 chars, no spaces)
       - key: SMTP_FROM_EMAIL
-        sync: false
+        sync: false     # set in Render Dashboard: suga240406@gmail.com
       - key: GEMINI_API_KEY
         sync: false
