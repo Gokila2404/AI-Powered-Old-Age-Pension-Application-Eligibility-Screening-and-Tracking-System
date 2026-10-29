@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import hmac
+import logging
 import secrets
 import smtplib
 import uuid
@@ -24,6 +25,8 @@ from backend.config import (
     SMTP_USER,
 )
 from backend.database import db_manager
+
+logger = logging.getLogger("pension_seva.otp")
 
 UTC = datetime.timezone.utc
 SUPPORTED_PURPOSES = {
@@ -182,19 +185,43 @@ def _send_email(target: str, code: str):
     message["From"] = SMTP_FROM_EMAIL
     message["To"] = target
     message.set_content(f"Your Pension Seva verification code is {code}. It expires in {OTP_EXPIRY_SECONDS // 60} minutes.")
-    try:
-        if SMTP_USE_SSL:
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
-                smtp.login(SMTP_USER, SMTP_PASSWORD)
-                smtp.send_message(message)
-        else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as smtp:
-                if SMTP_USE_TLS:
+
+    password = SMTP_PASSWORD.strip()
+    last_error: Exception | None = None
+
+    # Attempt 1: configured SSL mode (typically port 465)
+    # Attempt 2: STARTTLS on port 587 (fallback for hosts that block 465)
+    attempts = []
+    if SMTP_USE_SSL:
+        attempts.append((SMTP_HOST, SMTP_PORT, True))
+        attempts.append((SMTP_HOST, 587, False))
+    else:
+        attempts.append((SMTP_HOST, SMTP_PORT, False))
+        attempts.append((SMTP_HOST, 465, True))
+
+    for host, port, use_ssl in attempts:
+        try:
+            if use_ssl:
+                with smtplib.SMTP_SSL(host, port, timeout=20) as smtp:
+                    smtp.login(SMTP_USER, password)
+                    smtp.send_message(message)
+            else:
+                with smtplib.SMTP(host, port, timeout=20) as smtp:
+                    smtp.ehlo()
                     smtp.starttls()
-                smtp.login(SMTP_USER, SMTP_PASSWORD)
-                smtp.send_message(message)
-    except (OSError, smtplib.SMTPException) as exc:
-        raise HTTPException(status_code=502, detail="Could not deliver the verification email. Please try again later.") from exc
+                    smtp.ehlo()
+                    smtp.login(SMTP_USER, password)
+                    smtp.send_message(message)
+            return
+        except (OSError, smtplib.SMTPException) as exc:
+            logger.error(
+                "SMTP send failed via %s:%s (ssl=%s): %s: %s",
+                host, port, use_ssl, type(exc).__name__, exc,
+            )
+            last_error = exc
+
+    logger.error("SMTP delivery to %s failed after all attempts.", mask_destination(target))
+    raise HTTPException(status_code=502, detail="Could not deliver the verification email. Please try again later.") from last_error
 
 
 def _check_provider_and_target(target: str):
