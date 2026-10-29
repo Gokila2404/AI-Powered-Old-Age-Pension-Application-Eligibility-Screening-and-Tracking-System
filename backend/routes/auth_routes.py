@@ -19,6 +19,32 @@ from backend.services.otp_service import (
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
+# ---------------------------------------------------------------------------
+# Module-level helpers
+# ---------------------------------------------------------------------------
+
+_PLACEHOLDER_NAMES = {
+    "pension seva citizen",
+    "pension seva user",
+    "citizen",
+    "guest",
+    "user",
+}
+
+
+def derive_name_from_email(addr: str) -> str:
+    """Build a human-friendly display name from an email local-part.
+
+    e.g. 'gokila.r12@gmail.com' → 'Gokila R'
+    """
+    local = addr.split("@", 1)[0]
+    local = local.split("+")[0]
+    cleaned = "".join(ch if ch.isalnum() else " " for ch in local)
+    words = [w for w in cleaned.split() if w and not w.isdigit()]
+    if not words:
+        return ""
+    return " ".join(w[:1].upper() + w[1:] for w in words[:3])
+
 class SendOtpRequest(BaseModel):
     mobileOrEmail: str
     purpose: str = "registration"
@@ -121,28 +147,12 @@ async def login(payload: UserLogin):
 
     # Normalize accounts created by older versions before building the profile.
     user_id = user.get("id") or f"USER-{uuid.uuid4().hex[:8].upper()}"
-    PLACEHOLDER_NAMES = {
-        "pension seva citizen",
-        "pension seva user",
-        "citizen",
-        "guest",
-        "user",
-    }
-
-    def derive_name_from_email(addr: str) -> str:
-        """Build a human-friendly name from an address like 'gokila.r12@gmail.com'."""
-        local = addr.split("@", 1)[0]
-        local = local.split("+")[0]
-        cleaned = "".join(ch if ch.isalnum() else " " for ch in local)
-        words = [w for w in cleaned.split() if w and not w.isdigit()]
-        if not words:
-            return ""
-        return " ".join(w[:1].upper() + w[1:] for w in words[:3])
 
     stored_name = (user.get("fullName") or user.get("name") or "").strip()
-    if not stored_name or stored_name.lower() in PLACEHOLDER_NAMES:
-        # Recover the real name from the email (e.g. gokila.r12@gmail.com -> Gokila R12)
-        derived = derive_name_from_email(email if (email := (user.get("email") or ident).strip().lower()) else "")
+    if not stored_name or stored_name.lower() in _PLACEHOLDER_NAMES:
+        # Recover a readable name from the email local-part
+        email_addr = (user.get("email") or ident).strip().lower()
+        derived = derive_name_from_email(email_addr)
         if derived:
             stored_name = derived
     full_name = stored_name or "Citizen"
@@ -150,7 +160,7 @@ async def login(payload: UserLogin):
     mobile = user.get("mobile") or ""
     role = user.get("role") or "USER"
     created_at = user.get("createdAt") or datetime.datetime.utcnow().isoformat()
-    if any((not user.get("id"), not user.get("fullName"), not user.get("email"), not user.get("mobile"), not user.get("createdAt"))) or user.get("fullName", "").strip().lower() in PLACEHOLDER_NAMES:
+    if any((not user.get("id"), not user.get("fullName"), not user.get("email"), not user.get("mobile"), not user.get("createdAt"))) or user.get("fullName", "").strip().lower() in _PLACEHOLDER_NAMES:
         db_manager.update_one("users", lookup_query, {
             "id": user_id,
             "fullName": full_name,
@@ -317,7 +327,7 @@ async def verify_otp(payload: VerifyOtpRequest, request: Request):
             raise HTTPException(status_code=401, detail="The account could not be verified. Please sign in again.")
         user_id = user.get("id")
         stored_name = (user.get("fullName") or "").strip()
-        if not stored_name or stored_name.lower() in {"pension seva user", "pension seva citizen", "citizen", "user", "guest"}:
+        if not stored_name or stored_name.lower() in _PLACEHOLDER_NAMES:
             stored_name = derive_name_from_email(user.get("email", "")) or "Citizen"
         full_name = stored_name
         role = user.get("role") or "USER"

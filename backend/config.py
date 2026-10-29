@@ -68,6 +68,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(6
 # Whether OTP verification is required on every login (set LOGIN_OTP_REQUIRED=false to skip)
 LOGIN_OTP_REQUIRED = os.getenv("LOGIN_OTP_REQUIRED", "true").strip().lower() in {"1", "true", "yes", "on"}
 
+# OTP / Email delivery flags
+# Set ALLOW_CONSOLE_OTP_FALLBACK=true to print OTPs to server logs when SMTP
+# ports are blocked (e.g. Render Free tier). Never enable in production.
+ALLOW_CONSOLE_OTP_FALLBACK = os.getenv("ALLOW_CONSOLE_OTP_FALLBACK", "true").strip().lower() in {"1", "true", "yes", "on"}
+
+# Brevo (formerly Sendinblue) transactional email API key (optional alternative to Resend/SMTP)
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
+
 # CORS Configuration
 raw_cors = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CORS_ORIGINS = [orig.strip() for orig in raw_cors.split(",") if orig.strip()]
