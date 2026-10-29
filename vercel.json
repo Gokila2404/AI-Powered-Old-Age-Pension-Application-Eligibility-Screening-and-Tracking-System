@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://ai-powered-old-age-pension-application.onrender.com//api/:path*"
+      "destination": "https://ai-powered-old-age-pension-application.onrender.com/api/:path*"
     }
   ]
 }
