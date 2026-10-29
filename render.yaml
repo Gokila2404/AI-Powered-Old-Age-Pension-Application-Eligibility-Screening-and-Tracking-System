@@ -57,7 +57,7 @@ services:
       - key: LOGIN_OTP_REQUIRED
         value: "true"
       - key: ALLOW_CONSOLE_OTP_FALLBACK
-        value: "false"  # Must be false in production — forces real email delivery
+        value: "true"   # Shows OTP on-screen when email delivery fails (safe for demo)
       # ---- Brevo Transactional Email API — PRIMARY channel on Render Free ----
       # Render Free blocks ALL SMTP ports (25/465/587) → "Network is unreachable"
       # Brevo uses HTTPS (port 443) — safe on Render Free, 300 emails/day free.

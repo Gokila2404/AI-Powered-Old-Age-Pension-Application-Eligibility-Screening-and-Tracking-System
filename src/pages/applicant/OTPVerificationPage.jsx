@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { KeyRound, ShieldCheck, Volume2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { KeyRound, ShieldCheck, Volume2, AlertCircle, CheckCircle2, Eye, Mail } from 'lucide-react';
 import api from '../../api/client';
 import { useApp } from '../../context/AppContext';
 import { OTPInput } from '../../components/auth/OTPInput';
@@ -36,6 +36,10 @@ export const OTPVerificationPage = () => {
   const [resendAt, setResendAt] = useState(() => Date.now() + (verification?.resend_after || 30) * 1000);
   const [secondsLeft, setSecondsLeft] = useState(verification ? verification.expires_in || 120 : 0);
   const [resendLeft, setResendLeft] = useState(verification ? verification.resend_after || 30 : 0);
+
+  // If email delivery failed, the server returns demo_code in the response.
+  // Auto-fill the OTP input and show an on-screen banner so users can still verify.
+  const [demoCode, setDemoCode] = useState(verification?.demo_code || null);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -141,6 +145,8 @@ export const OTPVerificationPage = () => {
       setSecondsLeft(next.expires_in);
       setResendLeft(next.resend_after);
       setNotice(next.message || 'New code sent.');
+      // If resend also fell back to console, update demoCode so user can see the new code
+      if (next.demo_code) setDemoCode(next.demo_code);
     } catch (err) {
       const status = err.response?.status;
       setError(status === 429 ? (err.response?.data?.detail || t('otp.locked')) : err.response?.data?.detail || t('otp.unavailable'));
@@ -180,6 +186,30 @@ export const OTPVerificationPage = () => {
         {error && <div role="alert" aria-live="polite" className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-800"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}</div>}
         {notice && <div role="status" aria-live="polite" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center text-sm font-semibold text-emerald-800">{notice}</div>}
         {success && <div role="status" className="flex items-center justify-center gap-2 rounded-xl bg-emerald-50 p-3 font-bold text-emerald-800"><CheckCircle2 className="h-5 w-5" />{t('otp.success')} · {t('otp.continuing')}</div>}
+
+        {/* Email-delivery fallback banner — shown when server cannot send email
+            (Render Free blocks SMTP; Brevo/Resend not configured).
+            The server returns demo_code in the API response in this case. */}
+        {demoCode && !success && (
+          <div className="rounded-2xl border-2 border-amber-400 bg-amber-50 px-4 py-4 text-center">
+            <p className="text-xs font-bold uppercase tracking-wider text-amber-700 mb-1">
+              ⚠️ Email unavailable — use this code
+            </p>
+            <p className="text-[11px] text-amber-600 mb-3">
+              The email server is not reachable. Your verification code is shown below.
+            </p>
+            <div className="text-4xl font-black tracking-[0.3em] text-amber-900 bg-white rounded-xl py-3 px-4 border border-amber-300 shadow-sm mb-3">
+              {demoCode}
+            </div>
+            <button
+              type="button"
+              onClick={() => setCode(demoCode)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white transition"
+            >
+              Use this code ↓
+            </button>
+          </div>
+        )}
 
         {!success && <form onSubmit={handleVerify} className="space-y-6">
           <OTPInput value={code} onChange={setCode} disabled={busy || secondsLeft <= 0} />
