@@ -9,7 +9,7 @@ export const AdminSettingsPage = () => {
   return (
     <div className="flex flex-col lg:flex-row gap-6 font-sans">
       <AdminSidebar />
-      <section className="w-full space-y-5">
+      <section className="flex-1 min-w-0 space-y-5">
         <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-blue-50 p-3 text-blue-700"><Settings className="h-5 w-5" /></div>

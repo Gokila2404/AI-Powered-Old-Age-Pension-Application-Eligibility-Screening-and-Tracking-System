@@ -375,6 +375,10 @@ class ApplicationResponse(BaseModel):
     timeline: List[TimelineStep]
     adminRemarks: Optional[str] = None
     sanctionOrderNo: Optional[str] = None
+    sanctionDate: Optional[str] = None
+    approvedDate: Optional[str] = None
+    monthlyDisbursementAmount: Optional[int] = None
+    disbursementHistory: Optional[List[Dict[str, Any]]] = None
     correctionDetails: Optional[str] = None
 
 class ApplicationStatusUpdate(BaseModel):

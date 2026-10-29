@@ -194,14 +194,42 @@ async def admin_review_decision(
         updated_timeline.append(step_obj)
 
     previous_status = app.get("status")
+    sanction_no = payload.sanctionOrderNo or app.get("sanctionOrderNo")
+    if new_status == "APPROVED" and not sanction_no:
+        sanction_no = f"SAN-TN-2026-{uuid.uuid4().hex[:6].upper()}"
+
     update_fields = {
         "status": new_status,
         "adminRemarks": payload.remarks,
-        "sanctionOrderNo": payload.sanctionOrderNo or app.get("sanctionOrderNo"),
+        "sanctionOrderNo": sanction_no,
         "correctionDetails": payload.correctionField,
         "lastUpdated": now_iso,
         "timeline": updated_timeline
     }
+
+    if new_status == "APPROVED":
+        update_fields["sanctionDate"] = today_str
+        update_fields["approvedDate"] = today_str
+        update_fields["monthlyDisbursementAmount"] = 1000
+        # Initialize monthly DBT disbursements
+        update_fields["disbursementHistory"] = [
+            {
+                "month": "October 2026",
+                "amount": 1000,
+                "mode": "Direct Benefit Transfer (DBT)",
+                "status": "Credited",
+                "referenceNo": f"DBT-TN-{uuid.uuid4().hex[:8].upper()}",
+                "disbursedAt": today_str
+            },
+            {
+                "month": "November 2026",
+                "amount": 1000,
+                "mode": "Direct Benefit Transfer (DBT)",
+                "status": "Scheduled",
+                "referenceNo": "Scheduled on 1st of month",
+                "disbursedAt": "2026-11-01"
+            }
+        ]
 
     db_manager.update_one("applications", {"id": app_id}, update_fields)
     app.update(update_fields)

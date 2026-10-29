@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminSidebar } from '../../components/admin/AdminSidebar';
 import api from '../../api/client';
 import {
@@ -71,7 +71,7 @@ export const AdminRuleManagement = () => {
     <div className="flex flex-col lg:flex-row gap-6 animate-fadeIn pb-12 font-sans text-left">
       <AdminSidebar />
 
-      <main className="w-full space-y-6">
+      <main className="flex-1 min-w-0 space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">

@@ -131,8 +131,8 @@ export const AdminSidebar = () => {
         </div>
       )}
 
-      {/* ── Desktop fixed sidebar ──────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex lg:flex-col lg:fixed lg:top-0 lg:bottom-0 lg:left-0 lg:w-64 lg:z-30 p-3">
+      {/* ── Desktop sticky in-flow sidebar (adapts across all screen sizes, never overlaps content) ── */}
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 sticky top-4 self-start max-h-[calc(100vh-2rem)]">
         <SidebarContent />
       </aside>
     </>

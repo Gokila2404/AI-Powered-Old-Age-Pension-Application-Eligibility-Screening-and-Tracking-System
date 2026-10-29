@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import api from '../../api/client';
 import {
   ArrowRight, Bell, CheckCircle2, Clock3, FileCheck2, FilePlus2,
-  FolderOpen, HeartHandshake, Search, ShieldCheck, Sparkles
+  FolderOpen, HeartHandshake, Search, ShieldCheck, Sparkles,
+  IndianRupee, Calendar, Download, Wallet
 } from 'lucide-react';
 
 const quickActions = [
@@ -23,6 +24,53 @@ const statusTone = (status = '') => {
   return 'bg-blue-100 text-blue-800';
 };
 
+const MONTHLY_AMOUNT = 1000; // ₹1,000/mo for IGNOAPS
+
+/**
+ * Generate the last 6 months of simulated pension disbursement records
+ * starting from the approved/lastUpdated date.
+ */
+const generatePaymentHistory = (approvedDateStr) => {
+  const baseDate = approvedDateStr ? new Date(approvedDateStr) : new Date();
+  const now = new Date();
+  const records = [];
+
+  for (let i = 0; i < 6; i++) {
+    const payDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+    if (payDate > now) {
+      records.push({
+        month: payDate.toLocaleString('default', { month: 'long', year: 'numeric' }),
+        amount: MONTHLY_AMOUNT,
+        mode: 'DBT',
+        status: 'Pending',
+      });
+    } else {
+      records.push({
+        month: payDate.toLocaleString('default', { month: 'long', year: 'numeric' }),
+        amount: MONTHLY_AMOUNT,
+        mode: 'DBT',
+        status: 'Credited',
+      });
+    }
+  }
+  return records;
+};
+
+const downloadPaymentCSV = (records, applicationId) => {
+  const header = 'Month,Amount (₹),Payment Mode,Status\n';
+  const rows = records.map((r) => `${r.month},${r.amount},${r.mode},${r.status}`).join('\n');
+  const totalRow = `\nTotal Disbursed,₹${records.filter((r) => r.status === 'Credited').reduce((s, r) => s + r.amount, 0)},,`;
+  const blob = new Blob([header + rows + totalRow], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `pension_statement_${applicationId || 'export'}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export const UserDashboard = () => {
   const { currentUser, applications, schemes, notifications, language, aiAssessmentResult } = useApp();
   const [documents, setDocuments] = useState([]);
@@ -32,6 +80,18 @@ export const UserDashboard = () => {
   const latestNotifications = notifications.slice(0, 3);
   const latestScore = currentApp?.aiScore ?? aiAssessmentResult?.score;
   const firstName = currentUser?.fullName?.trim()?.split(/\s+/)[0] || 'Citizen';
+
+  const isApproved = currentApp?.status === 'APPROVED';
+
+  const paymentHistory = useMemo(() => {
+    if (!isApproved) return [];
+    return generatePaymentHistory(currentApp?.approvedDate || currentApp?.lastUpdated);
+  }, [isApproved, currentApp?.approvedDate, currentApp?.lastUpdated]);
+
+  const totalDisbursed = useMemo(
+    () => paymentHistory.filter((r) => r.status === 'Credited').reduce((sum, r) => sum + r.amount, 0),
+    [paymentHistory],
+  );
 
   useEffect(() => {
     let active = true;
@@ -51,7 +111,7 @@ export const UserDashboard = () => {
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Pension Seva · Citizen Dashboard</p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900">Welcome, {firstName}</h1>
-          <p className="mt-1 text-sm text-slate-600">Here’s what’s happening with your pension today.</p>
+          <p className="mt-1 text-sm text-slate-600">Here's what's happening with your pension today.</p>
         </div>
         <p className="text-xs text-slate-500">{currentApp?.lastUpdated ? `Updated ${new Date(currentApp.lastUpdated).toLocaleString()}` : 'No application updates yet'}</p>
       </header>
@@ -113,6 +173,89 @@ export const UserDashboard = () => {
           <Link to="/notifications" className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-blue-700 hover:underline">View All <ArrowRight className="h-4 w-4" /></Link>
         </article>
       </section>
+
+      {/* ── Sanction Details (APPROVED only) ── */}
+      {isApproved && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+            <Wallet className="h-4 w-4 text-emerald-700" />Sanction Details
+          </div>
+          <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3 lg:grid-cols-5">
+            <div>
+              <dt className="text-xs text-slate-500">Sanction Order No.</dt>
+              <dd className="mt-0.5 font-bold text-slate-900">{currentApp.sanctionOrderNo || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-500">Approved Date</dt>
+              <dd className="mt-0.5 font-semibold text-slate-900">
+                {currentApp.approvedDate ? new Date(currentApp.approvedDate).toLocaleDateString() : currentApp.lastUpdated ? new Date(currentApp.lastUpdated).toLocaleDateString() : '—'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-500">Scheme</dt>
+              <dd className="mt-0.5 font-semibold text-slate-900">{currentApp.schemeName || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-500">Monthly Amount</dt>
+              <dd className="mt-0.5 font-bold text-emerald-700">₹{MONTHLY_AMOUNT.toLocaleString('en-IN')}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-500">Payment Mode</dt>
+              <dd className="mt-0.5 font-semibold text-slate-900">Direct Benefit Transfer (DBT)</dd>
+            </div>
+          </dl>
+        </section>
+      )}
+
+      {/* ── Pension Payment History (APPROVED only) ── */}
+      {isApproved && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+              <IndianRupee className="h-4 w-4 text-emerald-700" />Pension Payment History
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+                Total Disbursed: ₹{totalDisbursed.toLocaleString('en-IN')}
+              </span>
+              <button
+                onClick={() => downloadPaymentCSV(paymentHistory, currentApp?.id)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
+              >
+                <Download className="h-3.5 w-3.5" />Download Payment Statement
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="px-4 py-2.5"><Calendar className="mr-1 inline h-3.5 w-3.5" />Month</th>
+                  <th className="px-4 py-2.5">Amount</th>
+                  <th className="px-4 py-2.5">Payment Mode</th>
+                  <th className="px-4 py-2.5">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paymentHistory.map((record, idx) => (
+                  <tr key={record.month} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}>
+                    <td className="whitespace-nowrap px-4 py-2.5 font-semibold text-slate-800">{record.month}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5 font-bold text-slate-900">₹{record.amount.toLocaleString('en-IN')}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5 text-slate-600">{record.mode}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${record.status === 'Credited' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                        {record.status === 'Credited' ? <CheckCircle2 className="h-3 w-3" /> : <Clock3 className="h-3 w-3" />}
+                        {record.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-3">

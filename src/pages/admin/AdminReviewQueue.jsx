@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { AdminSidebar } from '../../components/admin/AdminSidebar';
@@ -36,7 +36,7 @@ export const AdminReviewQueue = () => {
     <div className="flex flex-col lg:flex-row gap-6 animate-fadeIn pb-12 font-sans text-left">
       <AdminSidebar />
 
-      <main className="w-full space-y-6">
+      <main className="flex-1 min-w-0 space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 shadow-xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
           <div>

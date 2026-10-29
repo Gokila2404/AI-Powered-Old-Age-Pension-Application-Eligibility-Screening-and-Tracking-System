@@ -76,12 +76,6 @@ ALLOW_CONSOLE_OTP_FALLBACK = os.getenv("ALLOW_CONSOLE_OTP_FALLBACK", "true").str
 # Brevo (formerly Sendinblue) transactional email API key (optional alternative to Resend/SMTP)
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
 
-# ── TEMPORARY DIAGNOSTIC — remove after confirming key is loaded ──────────────
-print(f"[STARTUP] BREVO_API_KEY loaded: {bool(BREVO_API_KEY)} | length: {len(BREVO_API_KEY)} chars")
-print(f"[STARTUP] RESEND_API_KEY loaded: {bool(RESEND_API_KEY)} | length: {len(RESEND_API_KEY)} chars")
-print(f"[STARTUP] SMTP_USER: {repr(SMTP_USER[:6] + '***') if SMTP_USER else 'NOT SET'}")
-# ──────────────────────────────────────────────────────────────────────────────
-
 # CORS Configuration
 raw_cors = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CORS_ORIGINS = [orig.strip() for orig in raw_cors.split(",") if orig.strip()]

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { AdminSidebar } from '../../components/admin/AdminSidebar';
 import { Settings, Plus, CheckCircle2, Edit2, ShieldAlert } from 'lucide-react';
@@ -71,7 +71,7 @@ export const AdminSchemeManagement = () => {
     <div className="flex flex-col lg:flex-row gap-6 animate-fadeIn pb-12 font-sans">
       <AdminSidebar />
 
-      <main className="w-full space-y-6">
+      <main className="flex-1 min-w-0 space-y-6">
         <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 shadow-xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold">Scheme Rules & Criteria Manager</h1>
