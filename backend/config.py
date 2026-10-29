@@ -65,6 +65,8 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Admin@123")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "pension-seva-secure-academic-secret-key-2026-auth-token")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24 * 7)))  # 7 days
+# Whether OTP verification is required on every login (set LOGIN_OTP_REQUIRED=false to skip)
+LOGIN_OTP_REQUIRED = os.getenv("LOGIN_OTP_REQUIRED", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 # CORS Configuration
 raw_cors = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
